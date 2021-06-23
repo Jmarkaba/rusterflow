@@ -4,6 +4,8 @@ use ndarray::{Array, Array2};
 use ndarray::linalg::general_mat_mul;
 use ndarray_rand::RandomExt;
 
+use nalgebra::matrix;
+
 #[derive(Debug)]
 struct Network {
     num_layers: usize,
@@ -42,20 +44,62 @@ impl Network {
         return out;
     }
 
-        
-    fn sigmoid(z: f64) -> f64 {
+    fn sigmoid(&self, z: f64) -> f64 {
         return 1.0 / (1.0 + (-z).exp());
     }
 
-    fn predict(&self, input: Array2<f64>) {
-        for i in 1..self.sizes.len() {
-
+    fn relu(&self, z: f64) -> f64 {
+        if (z < 0.0) {
+            0.0
+        } else {
+            z
         }
     }
 
+    fn relu_gradient(&self, z: f64) -> f64 {
+        if (z < 0.0) {
+            0.0
+        } else {
+            1.0
+        }
+    }
+
+    fn cross_entropy(&self, prediction: &Array2<f64>, sample: Array2<f64>) -> f64 {
+        1.0
+    }
+
+    fn cross_entropy_loss(&self, prediction: &Array2<f64>, batch: Vec<Array2<f64>>) -> f64{
+        // Running sum.
+        let mut sum: f64 = 0.0;
+
+        // Iterate over the training samples in the batch.
+        for sample in batch {
+            // Add loss of training sample to running sum.
+            sum += self.cross_entropy(prediction, sample);
+        }
+
+        sum
+    }
+
+    //Return prediction vector
+    //Uses sigmoid activation function
+    fn predict(&self, mut input: Array2<f64>) -> Array2<f64> {
+        //Iterates through every layer and calculates z
+        for i in 1..self.sizes.len() {
+            //Calculate z for layer i
+            let z: Array2<f64> = self.calc_z(i, &input);
+
+            //Apply activation function element-wise.
+            for j in 1..z.len() {
+                input[[j, 0]] = self.sigmoid(z[[j, 0]]);
+            }
+        }
+
+        input
+    }
+
     fn update(/*batch, learning rate*/) {
-
-
+        //
     }
 }
 

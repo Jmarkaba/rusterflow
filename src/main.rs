@@ -15,11 +15,11 @@ struct Network<'a, 'b> {
     sizes: Vec<usize>,
     biases: Vec<Array2<f64>>,
     weights: Vec<Array2<f64>>,
-    activation: &'a ActivationTrait,
-    loss: &'b LossTrait,
+    activation: &'a dyn ActivationTrait, //dyn means dynamic trait in this case
+    loss: &'b dyn LossTrait, //dyn is not needed, but rust gives warnings to make it more cleaner/explicit code
 }
 
-impl Network {
+impl<'a, 'b> Network<'a, 'b> { //I have no idea why adding the <'a, 'b>s makes this code compile lmao
        fn new(sizes: &[usize]) -> Network {
 
         let num_layers = sizes.len();
@@ -40,6 +40,14 @@ impl Network {
             activation: &activation::Sigmoid,
             loss: &loss::CrossEntropy,
         }
+    }
+
+    fn predict() {
+
+    }
+
+    fn update() {
+
     }
 }
 
@@ -147,14 +155,16 @@ impl Network {
 
 //Activation Functions
 pub mod activation {
+    use ndarray::Array2;
+
     pub trait ActivationTrait {
         fn activation(&self, z: f64) -> f64;
         fn activation_gradient(&self, z: f64) -> f64;
-        fn activation_vectorized(&self);
+        fn activation_vectorized(&self, z: &mut Array2<f64>);
     }
 
     //Sigmoid
-    struct Sigmoid;
+    pub struct Sigmoid;
 
     impl ActivationTrait for Sigmoid {
         fn activation(&self, z: f64) -> f64 {
@@ -165,13 +175,15 @@ pub mod activation {
             self.activation(z) * (1.0 - self.activation(z))
         }
 
-        fn activation_vectorized(&self, ) {
-            ;
+        fn activation_vectorized(&self, z: &mut Array2<f64>) {
+            for i in 1..z.len() {
+                z[[i, 0]] = self.activation(z[[i, 0]]);
+            }
         }
     }
 
-    //ReLu
-    struct Relu;
+    //ReLU
+    pub struct Relu;
 
     impl ActivationTrait for Relu {
         fn activation(&self, z: f64) -> f64 {
@@ -190,43 +202,53 @@ pub mod activation {
             }
         }
 
-        fn activation_vectorized(&self) {
-
+        fn activation_vectorized(&self, z: &mut Array2<f64>) {
+            for i in 1..z.len() {
+                z[[i, 0]] = self.activation(z[[i, 0]]);
+            }
         }
     }
 }
 
 //Loss Functions
 pub mod loss {
-    pub trait LossTrait {
+    //type MatrixVector = Array2<f64>; Just a thought to make code more readable, not necessary at all
+    use ndarray::Array2;
 
+    pub trait LossTrait {
+        fn loss(&self, predicted: Array2<f64>, actual: Array2<f64>) -> f64;
     }
 
     //Cross Entropy
     pub struct CrossEntropy;
 
+    impl LossTrait for CrossEntropy {
+        fn loss(&self, predicted: Array2<f64>, actual: Array2<f64>) -> f64 {
+            let mut sum: f64 = 0.0;
+
+            for i in 1..predicted.len() {
+                sum -= actual[[i, 0]] * predicted[[i, 0]].log2(); // Review cross-entropy loss.
+            }
+
+            sum
+        }
+    }
+
+    //Square
+    pub struct Square;
+
+    impl LossTrait for Square {
+        fn loss(&self, predicted: Array2<f64>, actual: Array2<f64>) -> f64 {
+            let mut sum: f64 = 0.0;
+
+            for i in 1..predicted.len() {
+                sum += (predicted[[i, 0]] - actual[[i, 0]]).powi(2);
+            }
+
+            sum
+        }
+    }
 }
-
-// enum Activation {
-//     sigmoid,
-//     relu,
-//     tanh,
-// }
-
-// // some activation var called activation
-// let x = match (activation) {
-//     Sigmoid => sigmoid(),
-//     default =>
-// }
-// return x;
-
-
-
-// impl activation {
-//     fn activation() {
-//         ;
-//     }
-// }
 
 fn main() {
 

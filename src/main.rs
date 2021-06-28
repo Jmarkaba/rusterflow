@@ -10,16 +10,16 @@ use activation::ActivationTrait;
 use loss::LossTrait;
 
 //#[derive(Debug)]
-struct Network<'a, 'b> {
+struct Network<'a> {
     num_layers: usize,
     sizes: Vec<usize>,
     biases: Vec<Array2<f64>>,
     weights: Vec<Array2<f64>>,
     activation: &'a dyn ActivationTrait, //dyn means dynamic trait in this case
-    loss: &'b dyn LossTrait, //dyn is not needed, but rust gives warnings to make it more cleaner/explicit code
+    loss: &'a dyn LossTrait, //dyn is not needed, but rust gives warnings to make it more cleaner/explicit code
 }
 
-impl<'a, 'b> Network<'a, 'b> { //I have no idea why adding the <'a, 'b>s makes this code compile lmao
+impl<'a> Network<'a> { //I have no idea why adding the <'a, 'b>s makes this code compile lmao
        fn new(sizes: &[usize]) -> Network {
 
         let num_layers = sizes.len();

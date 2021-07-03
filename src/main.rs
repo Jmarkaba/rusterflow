@@ -173,13 +173,21 @@ pub mod loss {
 fn main() {
     //Create network
     let layers = [5, 4, 2];
-    let n = Network::new(&layers, activation::Relu::new(), loss::CrossEntropy::new());
+    let n1 = Network::new(&layers, activation::Relu::new(), loss::CrossEntropy::new()); //Can create as many activation/loss structures for 0 cost!?
+    let n2 = Network::new(&layers, activation::Sigmoid::new(), loss::Square::new());
 
-    n.predict(420.0);
-    n.update(420.0);
+    println!("n1:");
+    n1.predict(420.0);
+    n1.update(420.0);
+    n1.predict(-1.0);
+    n1.update(-1.0);
 
-    n.predict(-1.0);
-    n.update(-1.0);
+    println!("\nn2:");
+    n2.predict(420.0);
+    n2.update(420.0);
+    n2.predict(-1.0);
+    n2.update(-1.0);
+
 }
 
 //OLD CODE FROM NETWORK STRUCT

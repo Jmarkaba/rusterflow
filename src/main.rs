@@ -7,8 +7,8 @@ use ndarray::arr2;
 
 //use nalgebra::matrix;
 
-use activation::ActivationTrait;
-use loss::LossTrait;
+use activation::*;
+use loss::*;
 
 //#[derive(Debug)]
 struct Network<A: ActivationTrait, L: LossTrait> {
@@ -21,7 +21,7 @@ struct Network<A: ActivationTrait, L: LossTrait> {
 }
 
 impl<A: ActivationTrait, L: LossTrait> Network<A, L> {
-       fn new(sizes: &[usize], activation: A, loss: L) -> Self {
+       fn new(sizes: &[usize]) -> Self {
 
         let num_layers = sizes.len();
         let mut biases: Vec<Array2<f64>> = Vec::new();
@@ -33,13 +33,13 @@ impl<A: ActivationTrait, L: LossTrait> Network<A, L> {
         }
 
         //Assume activation is relu and loss is crossentropy
-        Network {
+        Self {
             num_layers: num_layers,
             sizes: sizes.to_owned(),
             biases: biases,
             weights: weights,
-            activation: activation,
-            loss: loss,
+            activation: A::new(),
+            loss: L::new(),
         }
     }
 
@@ -173,8 +173,8 @@ pub mod loss {
 fn main() {
     //Create network
     let layers = [5, 4, 2];
-    let n1 = Network::new(&layers, activation::Relu::new(), loss::CrossEntropy::new()); //Can create as many activation/loss structures for 0 cost!?
-    let n2 = Network::new(&layers, activation::Sigmoid::new(), loss::Square::new());
+    let n1 = Network::<Relu, CrossEntropy>::new(&layers); //Used "turbofish" syntax to make things cleaner
+    let n2 = Network::<Sigmoid, Square>::new(&layers);
 
     println!("n1:");
     n1.predict(420.0);
@@ -183,8 +183,8 @@ fn main() {
     n1.update(-1.0);
 
     println!("\nn2:");
-    n2.predict(420.0);
-    n2.update(420.0);
+    n2.predict(0.4);
+    n2.update(0.4);
     n2.predict(-1.0);
     n2.update(-1.0);
 

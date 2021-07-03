@@ -32,7 +32,6 @@ impl<A: ActivationTrait, L: LossTrait> Network<A, L> {
             weights.push(Array::random((sizes[i], sizes[i - 1]), Standard));
         }
 
-        //Assume activation is relu and loss is crossentropy
         Self {
             num_layers: num_layers,
             sizes: sizes.to_owned(),

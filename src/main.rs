@@ -1,11 +1,8 @@
 use rand::distributions::Standard;
 
 use ndarray::{Array, Array2};
-use ndarray::linalg::general_mat_mul;
 use ndarray_rand::RandomExt;
 use ndarray::arr2;
-
-//use nalgebra::matrix;
 
 use activation::*;
 use loss::*;
@@ -42,14 +39,26 @@ impl<A: ActivationTrait, L: LossTrait> Network<A, L> {
         }
     }
 
-    fn predict(&self, n: f64) {
-        //Just utilize activation function for now
-        println!("Activation = {}", self.activation.activation(n));
+    fn calc_z(&self, input: &Array2<f64>, layer: usize) -> Array2<f64> {
+        // W[layer] * X + B[layer]
+        self.weights[layer].dot(input) + &self.biases[layer]
     }
 
-    fn update(&self, n: f64) {
-        //Just utilize activation gradient function for now
-        println!("Activation Gradient = {}", self.activation.activation_gradient(n));
+    fn predict(&self, input: &Array2<f64>) -> Array2<f64> {
+        // Let the initial X be the input.
+        let mut x = input.clone();
+
+        // Iterate over the layers:
+        for i in 1..self.num_layers {
+            // X[i] = W[i-1] * X[i-1] + B[i-1]
+            x = self.calc_z(&x, i - 1);
+        }
+
+        x
+    }
+
+    fn update(&self) {
+
     }
 }
 
@@ -171,32 +180,19 @@ pub mod loss {
 //Test Code
 fn main() {
     //Create network
-    let layers = [5, 4, 2];
-    let n1 = Network::<Relu, CrossEntropy>::new(&layers); //Used "turbofish" syntax to make things cleaner
-    let n2 = Network::<Sigmoid, Square>::new(&layers);
+    let layers = [3, 5, 2];
+    let n1: Network<Relu, CrossEntropy> = Network::new(&layers);
+    let n2: Network<Sigmoid, Square> = Network::new(&layers);
 
     println!("n1:");
-    n1.predict(420.0);
-    n1.update(420.0);
-    n1.predict(-1.0);
-    n1.update(-1.0);
+    println!("Prediction = {}", n1.predict(&arr2(&[[1.0], [1.0], [1.0]])));
 
     println!("\nn2:");
-    n2.predict(0.4);
-    n2.update(0.4);
-    n2.predict(-1.0);
-    n2.update(-1.0);
-
+    println!("Prediction = {}", n2.predict(&arr2(&[[1.0], [1.0], [1.0]])));
 }
 
 //OLD CODE FROM NETWORK STRUCT
-    // fn calc_z(&self, layer: usize, input: &Array2<f64>) -> Array2<f64> {
-    //     let mut out: Array2<f64> = self.biases[layer].clone();
-    //     let mut weight = self.weights[layer].clone();
-    //     weight.swap_axes(0, 1);
-    //     general_mat_mul(1.0, &weight, input, 1.0, &mut out);
-    //     return out;
-    // }
+
     //
     // fn sigmoid(&self, z: f64) -> f64 {
     //     return 1.0 / (1.0 + (-z).exp());

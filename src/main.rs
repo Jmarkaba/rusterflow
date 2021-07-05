@@ -52,6 +52,7 @@ impl<A: ActivationTrait, L: LossTrait> Network<A, L> {
         for i in 1..self.num_layers {
             // X[i] = W[i-1] * X[i-1] + B[i-1]
             x = self.calc_z(&x, i - 1);
+            self.activation.activation_vectorized(&mut x);
         }
 
         x

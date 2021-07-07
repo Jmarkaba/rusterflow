@@ -3,6 +3,7 @@ use rand::distributions::Standard;
 use ndarray::{Array, Array2};
 use ndarray_rand::RandomExt;
 use ndarray::arr2;
+use ndarray::ArrayBase;
 
 use activation::*;
 use loss::*;
@@ -18,7 +19,7 @@ struct Network<A: ActivationTrait, L: LossTrait> {
 }
 
 impl<A: ActivationTrait, L: LossTrait> Network<A, L> {
-       fn new(sizes: &[usize]) -> Self {
+    fn new(sizes: &[usize]) -> Self {
 
         let num_layers = sizes.len();
         let mut biases: Vec<Array2<f64>> = Vec::new();
@@ -44,6 +45,19 @@ impl<A: ActivationTrait, L: LossTrait> Network<A, L> {
         self.weights[layer].dot(input) + &self.biases[layer]
     }
 
+    fn batch_gradient(&self, batch: &Vec<(Array2<f64>, Array2<f64>)>) -> Array2<f64> {
+        let n = batch.len();
+        // let sum_vector = ArrayBase::zeros(batch[0].1.shape());
+        for datum in batch {
+            let prediction = self.predict(&datum.0);
+            let loss_gradient = self.loss.loss_gradient(&prediction, &datum.1);
+
+
+        }
+
+        return batch[0].0.clone(); //Fix
+    }
+
     fn predict(&self, input: &Array2<f64>) -> Array2<f64> {
         // Let the initial X be the input.
         let mut x = input.clone();
@@ -52,14 +66,27 @@ impl<A: ActivationTrait, L: LossTrait> Network<A, L> {
         for i in 1..self.num_layers {
             // X[i] = W[i-1] * X[i-1] + B[i-1]
             x = self.calc_z(&x, i - 1);
+
+            //Apply activation function over each node in the layer
             self.activation.activation_vectorized(&mut x);
         }
 
+        //Return prediction
         x
     }
 
-    fn update(&self) {
+    fn update(&self, batch: &Vec<(Array2<f64>, Array2<f64>)>, learning_rate: f64, epochs: usize) {
+        // The batch cost function will be the average of the costs evaluated at each
+        // of the training examples.
 
+        // Take the gradient of the batch cost function with respect to the output vector
+        // by averaging the gradients of the losses of each training example in the batch.
+
+        // Iterate over the layers and do the following:
+            // Multiply the gradient with respect to the activations
+            // by the gradient of the activations with respect to z.
+
+            //
     }
 }
 
@@ -135,7 +162,8 @@ pub mod loss {
     use ndarray::Array2;
 
     pub trait LossTrait {
-        fn loss(&self, predicted: Array2<f64>, actual: Array2<f64>) -> f64;
+        fn loss(&self, predicted: &Array2<f64>, actual: &Array2<f64>) -> f64;
+        fn loss_gradient(&self, predicted: &Array2<f64>, actual: &Array2<f64>) -> Array2<f64>;
         fn new() -> Self where Self: Sized;
     }
 
@@ -143,7 +171,7 @@ pub mod loss {
     pub struct CrossEntropy;
 
     impl LossTrait for CrossEntropy {
-        fn loss(&self, predicted: Array2<f64>, actual: Array2<f64>) -> f64 {
+        fn loss(&self, predicted: &Array2<f64>, actual: &Array2<f64>) -> f64 {
             let mut sum: f64 = 0.0;
 
             for i in 1..predicted.len() {
@@ -151,6 +179,11 @@ pub mod loss {
             }
 
             sum
+        }
+
+        fn loss_gradient(&self, predicted: &Array2<f64>, actual: &Array2<f64>) -> Array2<f64> {
+            //Fix
+            return predicted.clone();
         }
 
         fn new() -> Self where Self: Sized {
@@ -162,7 +195,7 @@ pub mod loss {
     pub struct Square;
 
     impl LossTrait for Square {
-        fn loss(&self, predicted: Array2<f64>, actual: Array2<f64>) -> f64 {
+        fn loss(&self, predicted: &Array2<f64>, actual: &Array2<f64>) -> f64 {
             let mut sum: f64 = 0.0;
 
             for i in 1..predicted.len() {
@@ -170,6 +203,10 @@ pub mod loss {
             }
 
             sum
+        }
+
+        fn loss_gradient(&self, predicted: &Array2<f64>, actual: &Array2<f64>) -> Array2<f64> {
+            2.0 * (actual - predicted)
         }
 
         fn new() -> Self where Self: Sized {

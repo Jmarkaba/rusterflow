@@ -20,12 +20,12 @@ impl Activation for Sigmoid {
     }
 
     fn partial(&self, z: f64) -> f64 {
-        self.activation(z) * (1.0 - self.activation(z))
+        self.value(z) * (1.0 - self.value(z))
     }
 
     fn vectorized(&self, z: &mut Array2<f64>) {
         for i in 1..z.len() {
-            z[[i, 0]] = self.activation(z[[i, 0]]);
+            z[[i, 0]] = self.value(z[[i, 0]]);
         }
     }
 }
@@ -56,7 +56,7 @@ impl Activation for Relu {
 
     fn vectorized(&self, z: &mut Array2<f64>) {
         for i in 1..z.len() {
-            z[[i, 0]] = self.activation(z[[i, 0]]);
+            z[[i, 0]] = self.value(z[[i, 0]]);
         }
     }
 }

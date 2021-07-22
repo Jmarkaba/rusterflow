@@ -1,10 +1,9 @@
-mod activation;
-
 use ndarray::Array2;
+use crate::activation::*;
 
 type Shape = Array2<usize>;
 
-trait Layer {
+pub trait Layer {
     fn new<T>(&self, in_size: &Shape, out_size: &Shape, meta: Option<T>) -> Self;
     fn sizes() -> Shape;
     fn forward(&self, input: &Array2<f64>) -> Array2<f64>;
@@ -12,7 +11,7 @@ trait Layer {
 }
 
 //Dense Layer
-struct DenseLayer<A: ActivationDFJKDF> {
+struct DenseLayer<A: Activation> {
     in_size: usize,
     out_size: usize,
     weights: Array2<f64>,
@@ -20,6 +19,6 @@ struct DenseLayer<A: ActivationDFJKDF> {
     activation: A,
 }
 
-impl Layer for DenseLayer {
+impl<A: Activation> Layer for DenseLayer<A> {
 
 }

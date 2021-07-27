@@ -63,7 +63,7 @@ impl<A: Activation> Layer for DenseLayer<A> {
 
     fn backward(&mut self, input: &Array2<f64>) -> Array2<f64> {
         let dJ_dz = self.activation.gradient(&self.Z) * input;
-        self.partials = self.X * dJ_dz;
+        self.partials = dJ_dz * self.X;
         dJ_dz * self.weights //dJ/dx
     }
 }

@@ -55,7 +55,7 @@ impl<A: Activation> Layer for DenseLayer<A> {
 
         self.Z = match extended_input {
             Ok(inp) => inp.dot(&self.weights),
-            Err(e) => panic!("Unable to concatenate input"),
+            Err(_) => panic!("Unable to concatenate input"),
         };
 
         self.activation.vectorized(&self.Z)
@@ -63,7 +63,7 @@ impl<A: Activation> Layer for DenseLayer<A> {
 
     fn backward(&mut self, input: &Array2<f64>) -> Array2<f64> {
         let dJ_dz = self.activation.gradient(&self.Z) * input;
-        self.partials = dJ_dz * self.X;
-        dJ_dz * self.weights //dJ/dx
+        self.partials = &dJ_dz * &self.X;
+        dJ_dz * &self.weights //dJ/dx
     }
 }

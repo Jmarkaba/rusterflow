@@ -4,7 +4,8 @@ pub trait Activation {
     fn new() -> Self where Self: Sized;
     fn value(&self, z: f64) -> f64;
     fn partial(&self, z: f64) -> f64;
-    fn vectorized(&self, z: &mut Array2<f64>);
+    fn vectorized(&self, z: &Array2<f64>) -> Array2<f64>;
+    fn gradient(&self, z: &Array2<f64>) -> Array2<f64>;
 }
 
 //Sigmoid
@@ -23,10 +24,24 @@ impl Activation for Sigmoid {
         self.value(z) * (1.0 - self.value(z))
     }
 
-    fn vectorized(&self, z: &mut Array2<f64>) {
-        for i in 1..z.len() {
-            z[[i, 0]] = self.value(z[[i, 0]]);
+    fn vectorized(&self, z: &Array2<f64>) -> Array2<f64> {
+        let mut a = z.clone();
+
+        for i in 1..a.len() {
+            a[[i, 0]] = self.value(a[[i, 0]]);
         }
+
+        a
+    }
+
+    fn gradient(&self, z: &Array2<f64>) -> Array2<f64> {
+        let mut a = z.clone();
+
+        for i in 1..a.len() {
+            a[[i, 0]] = self.partial(a[[i, 0]]);
+        }
+
+        a
     }
 }
 
@@ -54,9 +69,23 @@ impl Activation for Relu {
         }
     }
 
-    fn vectorized(&self, z: &mut Array2<f64>) {
-        for i in 1..z.len() {
-            z[[i, 0]] = self.value(z[[i, 0]]);
+    fn vectorized(&self, z: &Array2<f64>) -> Array2<f64> {
+        let mut a = z.clone();
+
+        for i in 1..a.len() {
+            a[[i, 0]] = self.value(a[[i, 0]]);
         }
+
+        a
+    }
+
+    fn gradient(&self, z: &Array2<f64>) -> Array2<f64> {
+        let mut a = z.clone();
+
+        for i in 1..a.len() {
+            a[[i, 0]] = self.partial(a[[i, 0]]);
+        }
+
+        a
     }
 }

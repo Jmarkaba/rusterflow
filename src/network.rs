@@ -7,6 +7,8 @@ struct Datum {
     actual: Array2<f64>,
 }
 
+type Batch = Vec<Datum>;
+
 struct Network<L: Loss, Y: Layer> {
     num_layers: usize,
     layers: Vec<Y>,
@@ -50,6 +52,12 @@ impl<L: Loss, Y: Layer> Network<L, Y> {
 
         for layer in &mut self.layers {
             layer.update(learning_rate);
+        }
+    }
+
+    fn batch_update(&mut self, batch: &Batch, learning_rate: f64) {
+        for datum in batch {
+            self.update(datum, learning_rate / (batch.len() as f64));
         }
     }
 }

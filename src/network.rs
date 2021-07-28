@@ -2,81 +2,54 @@ use ndarray::Array2;
 use crate::layer::*;
 use crate::loss::*;
 
-struct Network<L: Loss, A: Layer> {
+struct Datum {
+    input: Array2<f64>,
+    actual: Array2<f64>,
+}
+
+struct Network<L: Loss, Y: Layer> {
     num_layers: usize,
-    layers: Vec<A>,
+    layers: Vec<Y>,
     loss: L,
 }
 
-impl<L: Loss, A: Layer> Network<L, A> {
-    //TODO:
-    fn new(sizes: &[usize]) -> Self {
-        //
-        // let num_layers = sizes.len();
-        // let mut biases: Vec<Array2<f64>> = Vec::new();
-        // let mut weights: Vec<Array2<f64>> = Vec::new();
-        //
-        // for i in 1..num_layers {
-        //     biases.push(Array::random((sizes[i], 1), Standard));
-        //     weights.push(Array::random((sizes[i], sizes[i - 1]), Standard));
-        // }
-        //
+impl<L: Loss, Y: Layer> Network<L, Y> {
+    fn new(loss: L) -> Self {
         Self {
-            num_layers: 420,
+            num_layers: 0,
             layers: Vec::new(),
             loss: L::new()
         }
     }
 
-    //TODO
-    fn calc_z(&self, input: &Array2<f64>, layer: usize) -> Array2<f64> {
-        // W[layer] * X + B[layer]
-        // self.weights[layer].dot(input) + &self.biases[layer]
-        input.clone()
+    //Could possibly change to dyn Layer
+    fn add(&mut self, layer: Y) {
+        self.layers.push(layer);
+        self.num_layers += 1;
     }
 
-    fn batch_gradient(&self, batch: &Vec<(Array2<f64>, Array2<f64>)>) -> Array2<f64> {
-        let n = batch.len();
-        // let sum_vector = ArrayBase::zeros(batch[0].1.shape());
-        for datum in batch {
-            let prediction = self.predict(&datum.0);
-            let loss_gradient = self.loss.gradient(&prediction, &datum.1);
-
-
-        }
-
-        return batch[0].0.clone(); //Fix
-    }
-
-    //TODO
-    fn predict(&self, input: &Array2<f64>) -> Array2<f64> {
-        // Let the initial X be the input.
+    fn predict(&mut self, input: &Array2<f64>) -> Array2<f64> {
         let mut x = input.clone();
 
-        // Iterate over the layers:
-        for i in 1..self.num_layers {
-            // X[i] = W[i-1] * X[i-1] + B[i-1]
-            x = self.calc_z(&x, i - 1);
-
-            //Apply activation function over each node in the layer
-            //self.activation.activation_vectorized(&mut x);
+        for layer in &mut self.layers {
+            x = layer.forward(&x);
         }
 
-        //Return prediction
         x
     }
 
-    fn update(&self, batch: &Vec<(Array2<f64>, Array2<f64>)>, learning_rate: f64, epochs: usize) {
-        // The batch cost function will be the average of the costs evaluated at each
-        // of the training examples.
+    fn update(&mut self, datum: &Datum, learning_rate: f64) {
+        let predicted = self.predict(&datum.input);
+        let loss = self.loss.value(&predicted, &datum.actual);
+        let loss_gradient = self.loss.gradient(&predicted, &datum.actual);
+        let mut dJ_da = loss_gradient;
 
-        // Take the gradient of the batch cost function with respect to the output vector
-        // by averaging the gradients of the losses of each training example in the batch.
+        for layer in &mut self.layers.iter_mut().rev() {
+            dJ_da = layer.backward(&dJ_da);
+        }
 
-        // Iterate over the layers and do the following:
-            // Multiply the gradient with respect to the activations
-            // by the gradient of the activations with respect to z.
-
-            //
+        for layer in &mut self.layers {
+            layer.update(learning_rate);
+        }
     }
 }

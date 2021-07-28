@@ -1,4 +1,4 @@
+mod network;
+mod activation;
 mod layer;
 mod loss;
-mod activation;
-mod network;

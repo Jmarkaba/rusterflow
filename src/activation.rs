@@ -28,7 +28,7 @@ impl Activation for Sigmoid {
         let mut a = z.clone();
 
         for i in 1..a.len() {
-            a[[i, 0]] = self.value(a[[i, 0]]);
+            a[[0, i]] = self.value(a[[0, i]]);
         }
 
         a
@@ -38,7 +38,7 @@ impl Activation for Sigmoid {
         let mut a = z.clone();
 
         for i in 1..a.len() {
-            a[[i, 0]] = self.partial(a[[i, 0]]);
+            a[[0, i]] = self.partial(a[[0, i]]);
         }
 
         a
@@ -73,7 +73,7 @@ impl Activation for Relu {
         let mut a = z.clone();
 
         for i in 1..a.len() {
-            a[[i, 0]] = self.value(a[[i, 0]]);
+            a[[0, i]] = self.value(a[[0, i]]);
         }
 
         a
@@ -83,7 +83,43 @@ impl Activation for Relu {
         let mut a = z.clone();
 
         for i in 1..a.len() {
-            a[[i, 0]] = self.partial(a[[i, 0]]);
+            a[[0, i]] = self.partial(a[[0, i]]);
+        }
+
+        a
+    }
+}
+
+pub struct Linear;
+
+impl Activation for Linear {
+    fn new() -> Self where Self: Sized {
+        Linear
+    }
+
+    fn value(&self, z: f64) -> f64 {
+        z
+    }
+
+    fn partial(&self, z: f64) -> f64 {
+        1.0
+    }
+
+    fn vectorized(&self, z: &Array2<f64>) -> Array2<f64> {
+        let mut a = z.clone();
+
+        for i in 1..a.len() {
+            a[[0, i]] = self.value(a[[0, i]]);
+        }
+
+        a
+    }
+
+    fn gradient(&self, z: &Array2<f64>) -> Array2<f64> {
+        let mut a = z.clone();
+
+        for i in 1..a.len() {
+            a[[0, i]] = self.partial(a[[0, i]]);
         }
 
         a

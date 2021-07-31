@@ -2,21 +2,21 @@ use ndarray::Array2;
 use crate::layer::*;
 use crate::loss::*;
 
-struct Datum {
-    input: Array2<f64>,
-    actual: Array2<f64>,
+pub struct Datum {
+    pub input: Array2<f64>,
+    pub actual: Array2<f64>,
 }
 
 type Batch = Vec<Datum>;
 
-struct Network<L: Loss, Y: Layer> {
+pub struct Network<L: Loss, Y: Layer> {
     num_layers: usize,
     layers: Vec<Y>,
     loss: L,
 }
 
 impl<L: Loss, Y: Layer> Network<L, Y> {
-    fn new(loss: L) -> Self {
+    pub fn new(loss: L) -> Self {
         Self {
             num_layers: 0,
             layers: Vec::new(),
@@ -25,12 +25,12 @@ impl<L: Loss, Y: Layer> Network<L, Y> {
     }
 
     //Could possibly change to dyn Layer
-    fn add(&mut self, layer: Y) {
+    pub fn add(&mut self, layer: Y) {
         self.layers.push(layer);
         self.num_layers += 1;
     }
 
-    fn predict(&mut self, input: &Array2<f64>) -> Array2<f64> {
+    pub fn predict(&mut self, input: &Array2<f64>) -> Array2<f64> {
         let mut x = input.clone();
 
         for layer in &mut self.layers {
@@ -55,7 +55,7 @@ impl<L: Loss, Y: Layer> Network<L, Y> {
         }
     }
 
-    fn batch_update(&mut self, batch: &Batch, learning_rate: f64) {
+    pub fn batch_update(&mut self, batch: &Batch, learning_rate: f64) {
         for datum in batch {
             self.update(datum, learning_rate / (batch.len() as f64));
         }

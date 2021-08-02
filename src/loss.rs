@@ -17,8 +17,8 @@ impl Loss for CrossEntropy {
     fn value(&self, predicted: &Array2<f64>, actual: &Array2<f64>) -> f64 {
         let mut sum: f64 = 0.0;
 
-        for i in 1..predicted.len() {
-            sum -= actual[[i, 0]] * predicted[[i, 0]].log2(); // Review cross-entropy loss.
+        for i in 0..predicted.len() {
+            sum -= actual[[0, i]] * predicted[[0, i]].log2(); // Review cross-entropy loss.
         }
 
         sum
@@ -41,14 +41,17 @@ impl Loss for Square {
     fn value(&self, predicted: &Array2<f64>, actual: &Array2<f64>) -> f64 {
         let mut sum: f64 = 0.0;
 
-        for i in 1..predicted.len() {
-            sum += (predicted[[i, 0]] - actual[[i, 0]]).powi(2);
+        for i in 0..predicted.len() {
+            sum += (predicted[[0, i]] - actual[[0, i]]).powi(2);
+
+            //DEBUG
+            //println!("i: {}, PREDICTED: {}, ACTUAL: {}", i, predicted[[0, i]], actual[[0, i]]);
         }
 
         sum
     }
 
     fn gradient(&self, predicted: &Array2<f64>, actual: &Array2<f64>) -> Array2<f64> {
-        2.0 * (actual - predicted)
+        2.0 * (predicted - actual)
     }
 }

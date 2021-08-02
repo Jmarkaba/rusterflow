@@ -1,8 +1,6 @@
 extern crate rusterflow;
 
-
-
-//Test Code
+//MNIST
 fn main() {
     //let network =
 }

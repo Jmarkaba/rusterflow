@@ -46,6 +46,8 @@ impl<L: Loss, Y: Layer> Network<L, Y> {
         let loss_gradient = self.loss.gradient(&predicted, &datum.actual);
         let mut dJ_da = loss_gradient;
 
+        //println!("PREDICTED: {}, LOSS: {}, LOSS_GRADIENT: {}", &predicted, &loss, &dJ_da);
+
         for layer in &mut self.layers.iter_mut().rev() {
             dJ_da = layer.backward(&dJ_da);
         }
@@ -57,7 +59,24 @@ impl<L: Loss, Y: Layer> Network<L, Y> {
 
     pub fn batch_update(&mut self, batch: &Batch, learning_rate: f64) {
         for datum in batch {
+            //DEBUG
+            //println!("LEN RATE: {}", learning_rate);
             self.update(datum, learning_rate / (batch.len() as f64));
         }
+    }
+
+    pub fn loss(&mut self, datum: &Datum) -> f64 {
+        let predicted = self.predict(&datum.input);
+        self.loss.value(&predicted, &datum.actual)
+    }
+
+    pub fn batch_loss(&mut self, batch: &Batch) -> f64 {
+        let mut loss = 0.0;
+
+        for datum in batch {
+            loss += self.loss(&datum);
+        }
+
+        loss / (batch.len() as f64)
     }
 }

@@ -32,17 +32,15 @@ impl<A: Activation> DenseLayer<A> {
         let in_size = in_size[[0, 0]];
         let out_size = out_size[[0, 0]];
         let mut weights = Array::random((in_size + 1, out_size), Standard);
-        // let mut partials = Array::zeros((in_size + 1, out_size));
-        // let mut x = Array::zeros((1, in_size + 1));
-        // let mut z = Array::zeros((1, out_size));
-        let mut partials = Array::random((in_size + 1, out_size), Standard);
-        let mut x = Array::random((1, in_size + 1), Standard);
-        let mut z = Array::random((1, out_size), Standard);
-
+        let mut partials = Array::zeros((in_size + 1, out_size));
+        let mut x = Array::zeros((1, in_size + 1));
+        let mut z = Array::zeros((1, out_size));
+        // let mut partials = Array::random((in_size + 1, out_size), Standard);
+        // let mut x = Array::random((1, in_size + 1), Standard);
+        // let mut z = Array::random((1, out_size), Standard);
 
         //DEBUG
         //println!("INSIZE: {}\n OUTSIZE: {}\n", in_size, out_size);
-
 
         Self {
             in_size: in_size,
@@ -86,6 +84,10 @@ impl<A: Activation> Layer for DenseLayer<A> {
         let dJ_dz = a * input;
         self.partials = self.X.t().dot(&dJ_dz);
         let weights_slice = &self.weights.slice(s![0..self.in_size, ..]);
+
+        //DEBUG
+        //println!("PARTIALS: {}", self.partials);
+
         dJ_dz.dot(&weights_slice.t()) //dJ/dx
     }
 
